@@ -101,7 +101,7 @@ MONGO_PORT=27017
 - [ ] Create Tests
 - [ ] Refactor the code
 - [ ] Create dockerfile and docker-compose
-
+- [ ] Create Documentation with Swagger
 
 ## ⚠️ License
 
