@@ -95,6 +95,14 @@ MONGO_PORT=27017
 - Now start api server with hot reloading `make docker.dev`
 - Visit **`http://localhost:5000`** or **`http://localhost:5000/swagger/`** -->
 
+### Todo
+
+- [ ] ADD JWT Middleware
+- [ ] Create Tests
+- [ ] Refactor the code
+- [ ] Create dockerfile and docker-compose
+
+
 ## ⚠️ License
 
 [MIT](https://opensource.org/licenses/MIT)
