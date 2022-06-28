@@ -4,6 +4,7 @@ import "github.com/caiostarke/restApi-and-grpc/app/queries"
 
 type Queries struct {
 	*queries.BookQueries
+	*queries.UserQueries
 }
 
 func OpenDBConnection() (*Queries, error) {
@@ -15,5 +16,6 @@ func OpenDBConnection() (*Queries, error) {
 
 	return &Queries{
 		BookQueries: &queries.BookQueries{DB: db},
+		UserQueries: &queries.UserQueries{DB: db},
 	}, nil
 }

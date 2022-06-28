@@ -16,6 +16,8 @@ func GenerateNewAccessToken() (string, error) {
 	claims := jwt.MapClaims{}
 
 	claims["exp"] = time.Now().Add(time.Minute * time.Duration(minuteCount)).Unix()
+	claims["user"] = "Kaer"
+	claims["role"] = "Admin"
 
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
 

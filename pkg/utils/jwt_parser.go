@@ -9,7 +9,9 @@ import (
 )
 
 type TokenMetadata struct {
-	Expires int64
+	Expires  int64
+	Username string
+	Role     string
 }
 
 func ExtractTokenMetadata(c *fiber.Ctx) (*TokenMetadata, error) {
