@@ -97,10 +97,10 @@ MONGO_PORT=27017
 
 ### Todo
 
+- [x] Create dockerfile and docker-compose
 - [ ] ADD JWT Middleware
 - [ ] Create Tests
 - [ ] Refactor the code
-- [ ] Create dockerfile and docker-compose
 - [ ] Create Documentation with Swagger
 
 ## ⚠️ License
