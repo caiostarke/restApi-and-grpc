@@ -4,6 +4,7 @@ import (
 	"time"
 
 	"github.com/caiostarke/restApi-and-grpc/app/models"
+	"github.com/caiostarke/restApi-and-grpc/pkg/utils"
 	"github.com/caiostarke/restApi-and-grpc/platform/database"
 	"github.com/gofiber/fiber/v2"
 )
@@ -43,29 +44,29 @@ func GetBooks(c *fiber.Ctx) error {
 
 func CreateBook(c *fiber.Ctx) error {
 	// Get now time.
-	// now := time.Now().Unix()
+	now := time.Now().Unix()
 
-	// // Get claims from JWT.
-	// claims, err := utils.ExtractTokenMetadata(c)
-	// if err != nil {
-	// 	// Return status 500 and JWT parse error.
-	// 	return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
-	// 		"error": true,
-	// 		"msg":   err.Error(),
-	// 	})
-	// }
+	// Get claims from JWT.
+	claims, err := utils.ExtractTokenMetadata(c)
+	if err != nil {
+		// Return status 500 and JWT parse error.
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"error": true,
+			"msg":   err.Error(),
+		})
+	}
 
-	// // Set expiration time from JWT data of current book.
-	// expires := claims.Expires
+	// Set expiration time from JWT data of current book.
+	expires := claims.Expires
 
-	// // Checking, if now time greather than expiration from JWT.
-	// if now > expires {
-	// 	// Return status 401 and unauthorized error message.
-	// 	return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{
-	// 		"error": true,
-	// 		"msg":   "unauthorized, check expiration time of your token",
-	// 	})
-	// }
+	// Checking, if now time greather than expiration from JWT.
+	if now > expires {
+		// Return status 401 and unauthorized error message.
+		return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{
+			"error": true,
+			"msg":   "unauthorized, check expiration time of your token",
+		})
+	}
 
 	// Create new Book struct
 	book := &models.Book{}
@@ -146,29 +147,29 @@ func GetBook(c *fiber.Ctx) error {
 
 func UpdateBook(c *fiber.Ctx) error {
 	// Get now time.
-	// now := time.Now().Unix()
+	now := time.Now().Unix()
 
-	// // Get claims from JWT.
-	// claims, err := utils.ExtractTokenMetadata(c)
-	// if err != nil {
-	// 	// Return status 500 and JWT parse error.
-	// 	return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
-	// 		"error": true,
-	// 		"msg":   err.Error(),
-	// 	})
-	// }
+	// Get claims from JWT.
+	claims, err := utils.ExtractTokenMetadata(c)
+	if err != nil {
+		// Return status 500 and JWT parse error.
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"error": true,
+			"msg":   err.Error(),
+		})
+	}
 
-	// // Set expiration time from JWT data of current book.
-	// expires := claims.Expires
+	// Set expiration time from JWT data of current book.
+	expires := claims.Expires
 
-	// // Checking, if now time greather than expiration from JWT.
-	// if now > expires {
-	// 	// Return status 401 and unauthorized error message.
-	// 	return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{
-	// 		"error": true,
-	// 		"msg":   "unauthorized, check expiration time of your token",
-	// 	})
-	// }
+	// Checking, if now time greather than expiration from JWT.
+	if now > expires {
+		// Return status 401 and unauthorized error message.
+		return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{
+			"error": true,
+			"msg":   "unauthorized, check expiration time of your token",
+		})
+	}
 
 	// Create new Book struct
 	book := &models.Book{}
@@ -205,18 +206,6 @@ func UpdateBook(c *fiber.Ctx) error {
 	// Set initialized default data for book:
 	book.UpdatedAt = time.Now()
 
-	// Create a new validator for a Book model.
-	// validate := utils.NewValidator()
-
-	// Validate book fields.
-	// if err := validate.Struct(book); err != nil {
-	// 	// Return, if some fields are not valid.
-	// 	return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
-	// 		"error": true,
-	// 		"msg":   utils.ValidatorErrors(err),
-	// 	})
-	// }
-
 	// Update book by given ID.
 	if err := db.UpdateBook(foundedBook.ID, book); err != nil {
 		// Return status 500 and error message.
@@ -228,34 +217,33 @@ func UpdateBook(c *fiber.Ctx) error {
 
 	// Return status 201.
 	return c.SendStatus(fiber.StatusCreated)
-
 }
 
 func DeleteBook(c *fiber.Ctx) error {
 	// Get now time.
-	// now := time.Now().Unix()
+	now := time.Now().Unix()
 
-	// // Get claims from JWT.
-	// claims, err := utils.ExtractTokenMetadata(c)
-	// if err != nil {
-	// 	// Return status 500 and JWT parse error.
-	// 	return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
-	// 		"error": true,
-	// 		"msg":   err.Error(),
-	// 	})
-	// }
+	// Get claims from JWT.
+	claims, err := utils.ExtractTokenMetadata(c)
+	if err != nil {
+		// Return status 500 and JWT parse error.
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"error": true,
+			"msg":   err.Error(),
+		})
+	}
 
-	// // Set expiration time from JWT data of current book.
-	// expires := claims.Expires
+	// Set expiration time from JWT data of current book.
+	expires := claims.Expires
 
-	// // Checking, if now time greather than expiration from JWT.
-	// if now > expires {
-	// 	// Return status 401 and unauthorized error message.
-	// 	return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{
-	// 		"error": true,
-	// 		"msg":   "unauthorized, check expiration time of your token",
-	// 	})
-	// }
+	// Checking, if now time greather than expiration from JWT.
+	if now > expires {
+		// Return status 401 and unauthorized error message.
+		return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{
+			"error": true,
+			"msg":   "unauthorized, check expiration time of your token",
+		})
+	}
 
 	// Create new Book struct
 	book := &models.Book{}
@@ -268,18 +256,6 @@ func DeleteBook(c *fiber.Ctx) error {
 			"msg":   err.Error(),
 		})
 	}
-
-	// Create a new validator for a Book model.
-	// validate := utils.NewValidator()
-
-	// Validate only one book field ID.
-	// if err := validate.StructPartial(book, "id"); err != nil {
-	// 	// Return, if some fields are not valid.
-	// 	return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
-	// 		"error": true,
-	// 		"msg":   utils.ValidatorErrors(err),
-	// 	})
-	// }
 
 	// Create database connection.
 	db, err := database.OpenDBConnection()

@@ -55,8 +55,11 @@ func (q *BookQueries) GetBook(id string) (models.Book, error) {
 
 	collection := q.DB.Database("library").Collection("books")
 	res := collection.FindOne(context.Background(), oid)
-	res.Decode(&book)
+	if res.Err() != nil {
+		return book, res.Err()
+	}
 
+	res.Decode(&book)
 	return book, nil
 }
 
