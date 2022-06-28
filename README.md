@@ -102,6 +102,8 @@ MONGO_PORT=27017
 - [x] Create Tests
 - [x] Refactor the code
 - [x] Create Documentation with Swagger
+- [ ] Create Method to Register Users
+- [ ] Create Method to Login Users with respective credentials in JWT
 
 ## ⚠️ License
 
