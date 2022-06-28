@@ -101,7 +101,7 @@ MONGO_PORT=27017
 - [x] ADD JWT Middleware
 - [x] Create Tests
 - [x] Refactor the code
-- [ ] Create Documentation with Swagger
+- [x] Create Documentation with Swagger
 
 ## ⚠️ License
 

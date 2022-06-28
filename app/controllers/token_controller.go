@@ -5,6 +5,14 @@ import (
 	"github.com/gofiber/fiber/v2"
 )
 
+// GetNewAccessToken method for create a new access token.
+// @Description Create a new access token.
+// @Summary create a new access token
+// @Tags Token
+// @Accept json
+// @Produce json
+// @Success 200 {string} status "ok"
+// @Router /v1/token/new [get]
 func GetNewAcessToken(c *fiber.Ctx) error {
 	token, err := utils.GenerateNewAccessToken()
 	if err != nil {
