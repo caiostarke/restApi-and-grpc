@@ -37,6 +37,21 @@ definitions:
         minimum: 1
         type: integer
     type: object
+  models.UserResponse:
+    properties:
+      email:
+        type: string
+      id:
+        type: string
+      role:
+        type: string
+      username:
+        type: string
+    required:
+    - email
+    - id
+    - username
+    type: object
 info:
   contact:
     email: your@mail.com
@@ -207,6 +222,90 @@ paths:
       summary: create a new access token
       tags:
       - Token
+  /v1/user:
+    delete:
+      consumes:
+      - application/json
+      description: DeleteUser func deletes an user..
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/models.UserResponse'
+            type: array
+      summary: DeleteUser func deletes an user.
+      tags:
+      - Users
+    get:
+      consumes:
+      - application/json
+      description: Get an user by giver id.
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/models.UserResponse'
+            type: array
+      summary: Get an user by giver id
+      tags:
+      - Users
+    post:
+      consumes:
+      - application/json
+      description: Create a new user.
+      parameters:
+      - description: Username
+        in: body
+        name: username
+        required: true
+        schema:
+          type: string
+      - description: Password
+        in: body
+        name: password
+        required: true
+        schema:
+          type: string
+      - description: Email
+        in: body
+        name: email
+        required: true
+        schema:
+          type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.UserResponse'
+      security:
+      - ApiKeyAuth: []
+      summary: create a new user
+      tags:
+      - Users
+    put:
+      consumes:
+      - application/json
+      description: UpdateUser func updates an user..
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/models.UserResponse'
+            type: array
+      summary: UpdateUser func updates an user.
+      tags:
+      - Users
 securityDefinitions:
   ApiKeyAuth:
     in: header
