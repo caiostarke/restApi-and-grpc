@@ -23,9 +23,13 @@ func ExtractTokenMetadata(c *fiber.Ctx) (*TokenMetadata, error) {
 	claims, ok := token.Claims.(jwt.MapClaims)
 	if ok && token.Valid {
 		expires := int64(claims["exp"].(float64))
+		user := claims["user"].(string)
+		role := claims["role"].(string)
 
 		return &TokenMetadata{
-			Expires: expires,
+			Expires:  expires,
+			Username: user,
+			Role:     role,
 		}, nil
 	}
 

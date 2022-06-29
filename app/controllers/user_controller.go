@@ -1,6 +1,7 @@
 package controllers
 
 import (
+	"fmt"
 	"time"
 
 	"github.com/caiostarke/restApi-and-grpc/app/models"
@@ -98,14 +99,6 @@ func UpdateUser(c *fiber.Ctx) error {
 		})
 	}
 
-	if user != userFromUser.Username {
-		// Return status 401 and unauthorized error message.
-		return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{
-			"error": true,
-			"msg":   "unauthorized, you cant update other user",
-		})
-	}
-
 	// Create database connection.
 	db, err := database.OpenDBConnection()
 	if err != nil {
@@ -117,7 +110,7 @@ func UpdateUser(c *fiber.Ctx) error {
 	}
 
 	// Checking, if user with given ID is exists.
-	foundedUser, err := db.GetUser(userFromUser.ID.Hex())
+	foundedUser, err := db.GetUser(userFromUser.ID)
 	if err != nil {
 		// Return status 404 and user not found error.
 		return c.Status(fiber.StatusNotFound).JSON(fiber.Map{
@@ -126,8 +119,22 @@ func UpdateUser(c *fiber.Ctx) error {
 		})
 	}
 
+	fmt.Println(foundedUser.Username)
+	fmt.Println(user)
+
+	if user != foundedUser.Username {
+		// Return status 401 and unauthorized error message.
+		return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{
+			"error": true,
+			"msg":   "unauthorized, you cant update other user",
+		})
+	}
+
+	foundedUser.Email = userFromUser.Email
+	foundedUser.Username = userFromUser.Username
+
 	// Update user by given ID.
-	if err := db.UpdateUser(foundedUser.ID, userFromUser); err != nil {
+	if err := db.UpdateUser(foundedUser.ID, &foundedUser); err != nil {
 		// Return status 500 and error message.
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
 			"error": true,
@@ -165,6 +172,8 @@ func DeleteUser(c *fiber.Ctx) error {
 	expires := claims.Expires
 	usernameFromJWT := claims.Username
 	roleFromJWT := claims.Role
+	fmt.Println(roleFromJWT)
+	fmt.Println(usernameFromJWT)
 
 	// Checking, if now time greather than expiration from JWT.
 	if now > expires {
@@ -191,7 +200,7 @@ func DeleteUser(c *fiber.Ctx) error {
 		// Return status 401 and unauthorized error message.
 		return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{
 			"error": true,
-			"msg":   "unauthorized, check expiration time of your token",
+			"msg":   "unauthorized, not user or admin",
 		})
 	}
 
@@ -206,7 +215,7 @@ func DeleteUser(c *fiber.Ctx) error {
 	}
 
 	// Checking, if user with given ID is exists.
-	foundedUser, err := db.GetUser(user.ID.Hex())
+	foundedUser, err := db.GetUser(user.ID)
 	if err != nil {
 		// Return status 404 and user not found error.
 		return c.Status(fiber.StatusNotFound).JSON(fiber.Map{
@@ -216,7 +225,7 @@ func DeleteUser(c *fiber.Ctx) error {
 	}
 
 	// Delete user by given ID.
-	if err := db.DeleteBook(foundedUser.ID); err != nil {
+	if err := db.DeleteUser(foundedUser.ID.Hex()); err != nil {
 		// Return status 500 and error message.
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
 			"error": true,
@@ -279,5 +288,53 @@ func CreateUser(c *fiber.Ctx) error {
 		"error": false,
 		"msg":   nil,
 		"user":  userFiltered,
+	})
+}
+
+func Login(c *fiber.Ctx) error {
+	// Create new User struct
+	user := &models.LoginRequest{}
+
+	// Check, if received JSON data is valid.
+	if err := c.BodyParser(user); err != nil {
+		// Return status 400 and error message.
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"error": true,
+			"msg":   err.Error(),
+		})
+	}
+
+	// Create database connection.
+	db, err := database.OpenDBConnection()
+	if err != nil {
+		// Return status 500 and database connection error.
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"error": true,
+			"msg":   err.Error(),
+		})
+	}
+
+	userRes, err := db.Login(user)
+	if err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"error": true,
+			"msg":   "Login, ID or Password are wrong",
+		})
+	}
+
+	token, err := utils.GenerateNewAccessToken(userRes)
+	if err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"error": true,
+			"msg":   err.Error(),
+		})
+	}
+
+	// Return status 200 OK.
+	return c.JSON(fiber.Map{
+		"error": false,
+		"msg":   nil,
+		"user":  userRes,
+		"token": token,
 	})
 }

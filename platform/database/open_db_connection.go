@@ -8,7 +8,6 @@ type Queries struct {
 }
 
 func OpenDBConnection() (*Queries, error) {
-
 	db, err := MongoDBConnection()
 	if err != nil {
 		return nil, err

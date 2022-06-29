@@ -15,9 +15,8 @@ type UserQueries struct {
 	DB *mongo.Client
 }
 
-func (q *UserQueries) GetUser(id string) (models.UserResponse, error) {
-	user := models.UserResponse{}
-	userFromDB := models.User{}
+func (q *UserQueries) GetUser(id string) (models.User, error) {
+	user := models.User{}
 	filter, err := utils.FilterId(id)
 	if err != nil {
 		return user, err
@@ -29,11 +28,7 @@ func (q *UserQueries) GetUser(id string) (models.UserResponse, error) {
 		return user, res.Err()
 	}
 
-	res.Decode(&userFromDB)
-	user.ID = userFromDB.ID
-	user.Username = userFromDB.Username
-	user.Email = userFromDB.Email
-	user.Role = userFromDB.Role
+	res.Decode(&user)
 
 	return user, nil
 }
@@ -59,15 +54,10 @@ func (q *BookQueries) CreateUser(u *models.SignUpRequest) error {
 	return nil
 }
 
-func (q *BookQueries) UpdateUser(id primitive.ObjectID, u *models.UserResponse) error {
+func (q *BookQueries) UpdateUser(id primitive.ObjectID, u *models.User) error {
 	collection := q.DB.Database("library").Collection("users")
 
-	user := models.User{}
-	user.Email = u.Email
-	user.Username = u.Username
-	user.Role = u.Role
-
-	_, err := collection.ReplaceOne(context.Background(), primitive.M{"_id": id}, user)
+	_, err := collection.ReplaceOne(context.Background(), primitive.M{"_id": id}, u)
 	if err != nil {
 		return err
 	}
@@ -75,13 +65,47 @@ func (q *BookQueries) UpdateUser(id primitive.ObjectID, u *models.UserResponse) 
 	return nil
 }
 
-func (q *BookQueries) DeleteUser(id primitive.ObjectID) error {
+func (q *BookQueries) DeleteUser(id string) error {
 	collection := q.DB.Database("library").Collection("users")
+	oid, err := utils.FilterId(id)
+	if err != nil {
+		return err
+	}
 
-	_, err := collection.DeleteOne(context.Background(), primitive.M{"_id": id})
+	_, err = collection.DeleteOne(context.Background(), oid)
 	if err != nil {
 		return err
 	}
 
 	return nil
+}
+
+func (q *BookQueries) Login(user *models.LoginRequest) (models.UserResponse, error) {
+	userRes := models.UserResponse{}
+	userModel := models.User{}
+
+	collection := q.DB.Database("library").Collection("users")
+
+	fmt.Println(user.ID)
+
+	res := collection.FindOne(context.Background(), primitive.M{"_id": user.ID})
+	if res.Err() != nil {
+		return userRes, res.Err()
+	}
+
+	if err := res.Decode(&userModel); err != nil {
+		return userRes, err
+	}
+
+	err := bcrypt.CompareHashAndPassword(userModel.Password, []byte(user.Password))
+	if err != nil {
+		return userRes, err
+	}
+
+	userRes.ID = userModel.ID.Hex()
+	userRes.Email = userModel.Email
+	userRes.Username = userModel.Username
+	userRes.Role = userModel.Role
+
+	return userRes, nil
 }

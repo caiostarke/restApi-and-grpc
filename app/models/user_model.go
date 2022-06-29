@@ -13,15 +13,16 @@ type User struct {
 }
 
 type UserResponse struct {
-	ID       primitive.ObjectID `json:"id,omitempty" validate:"required"`
-	Username string             `json:"username" validate:"required"`
-	Email    string             `json:"email" validate:"required"`
-	Role     string             `json:"role"`
+	ID       string `json:"id,omitempty" validate:"required"`
+	Username string `json:"username" validate:"required"`
+	Email    string `json:"email" validate:"required"`
+	Role     string `json:"role"`
 }
 
 type LoginRequest struct {
-	Username string `json:"username" validate:"required,len=15"`
-	Password string `json:"password" validate:"required"`
+	ID       primitive.ObjectID `json:"id" validate:"required"`
+	Username string             `json:"username" validate:"required,len=15"`
+	Password string             `json:"password" validate:"required"`
 }
 
 type SignUpRequest struct {

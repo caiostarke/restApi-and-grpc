@@ -1,6 +1,7 @@
 package controllers
 
 import (
+	"github.com/caiostarke/restApi-and-grpc/app/models"
 	"github.com/caiostarke/restApi-and-grpc/pkg/utils"
 	"github.com/gofiber/fiber/v2"
 )
@@ -14,7 +15,8 @@ import (
 // @Success 200 {string} status "ok"
 // @Router /v1/token/new [get]
 func GetNewAcessToken(c *fiber.Ctx) error {
-	token, err := utils.GenerateNewAccessToken()
+	user := models.UserResponse{}
+	token, err := utils.GenerateNewAccessToken(user)
 	if err != nil {
 		// Return status 500 and token generation error.
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{

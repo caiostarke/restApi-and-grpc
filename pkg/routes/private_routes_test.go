@@ -6,6 +6,7 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/caiostarke/restApi-and-grpc/app/models"
 	"github.com/caiostarke/restApi-and-grpc/pkg/utils"
 	"github.com/gofiber/fiber/v2"
 	"github.com/joho/godotenv"
@@ -16,10 +17,15 @@ func TestPrivateRoutes(t *testing.T) {
 	if err := godotenv.Load("../../.env.test"); err != nil {
 		panic(err)
 	}
+	userTest := models.UserResponse{}
 
-	dataString := `{"id": "000000000000000000000000"}`
+	dataString := `{
+		"id": "62bc54a2ff197412ae97d03d",
+		"username":"random",
+		"email": "random.rand.rrr"
+	}`
 
-	token, err := utils.GenerateNewAccessToken()
+	token, err := utils.GenerateNewAccessToken(userTest)
 	if err != nil {
 		panic(err)
 	}
@@ -59,6 +65,15 @@ func TestPrivateRoutes(t *testing.T) {
 			body:          strings.NewReader(dataString),
 			expectedError: false,
 			expectedCode:  404,
+		},
+		{
+			description:   "delete user without credentials",
+			route:         "/api/v1/user",
+			method:        "DELETE",
+			tokenString:   "Bearer " + token,
+			body:          strings.NewReader(dataString),
+			expectedError: false,
+			expectedCode:  401,
 		},
 	}
 
