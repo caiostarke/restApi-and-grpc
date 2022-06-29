@@ -104,6 +104,7 @@ MONGO_PORT=27017
 - [x] Create Documentation with Swagger
 - [x] Create Method to Register Users
 - [x] Create Method to Login Users with respective credentials in JWT
+- [ ] Add a redis container to persist authorized users 
 
 ## ⚠️ License
 
