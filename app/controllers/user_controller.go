@@ -6,6 +6,7 @@ import (
 
 	"github.com/caiostarke/restApi-and-grpc/app/models"
 	"github.com/caiostarke/restApi-and-grpc/pkg/utils"
+	"github.com/caiostarke/restApi-and-grpc/platform/caching"
 	"github.com/caiostarke/restApi-and-grpc/platform/database"
 	"github.com/gofiber/fiber/v2"
 )
@@ -64,6 +65,20 @@ func UpdateUser(c *fiber.Ctx) error {
 	// Get now time.
 	now := time.Now().Unix()
 
+	redisClient, err := caching.OpenRedisConnection()
+	if err != nil {
+		// Return status 500 and database connection error.
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"error": true,
+			"msg":   err.Error(),
+		})
+	}
+
+	adm, err := redisClient.Get("admin")
+	if err != nil {
+		fmt.Println("key doesnt exists or nothing found")
+	}
+
 	// Get claims from JWT.
 	claims, err := utils.ExtractTokenMetadata(c)
 	if err != nil {
@@ -74,9 +89,10 @@ func UpdateUser(c *fiber.Ctx) error {
 		})
 	}
 
-	// Set expiration time from JWT data of current book.
+	// Set expiration time from JWT data of current user.
 	expires := claims.Expires
-	user := claims.Username
+	usernameFromJWT := claims.Username
+	roleFromJWT := claims.Role
 
 	// Checking, if now time greather than expiration from JWT.
 	if now > expires {
@@ -119,15 +135,14 @@ func UpdateUser(c *fiber.Ctx) error {
 		})
 	}
 
-	fmt.Println(foundedUser.Username)
-	fmt.Println(user)
-
-	if user != foundedUser.Username {
-		// Return status 401 and unauthorized error message.
-		return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{
-			"error": true,
-			"msg":   "unauthorized, you cant update other user",
-		})
+	if usernameFromJWT != adm {
+		if usernameFromJWT != foundedUser.Username && roleFromJWT != "admin" {
+			// Return status 401 and unauthorized error message.
+			return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{
+				"error": true,
+				"msg":   "unauthorized, not user or admin",
+			})
+		}
 	}
 
 	foundedUser.Email = userFromUser.Email
@@ -158,7 +173,22 @@ func DeleteUser(c *fiber.Ctx) error {
 	// Get now time.
 	now := time.Now().Unix()
 
+	redisClient, err := caching.OpenRedisConnection()
+	if err != nil {
+		// Return status 500 and database connection error.
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"error": true,
+			"msg":   err.Error(),
+		})
+	}
+
+	adm, err := redisClient.Get("admin")
+	if err != nil {
+		fmt.Println("key doesnt exists or nothing found")
+	}
+
 	// Get claims from JWT.
+
 	claims, err := utils.ExtractTokenMetadata(c)
 	if err != nil {
 		// Return status 500 and JWT parse error.
@@ -196,13 +226,17 @@ func DeleteUser(c *fiber.Ctx) error {
 		})
 	}
 
-	if usernameFromJWT != user.Username && roleFromJWT != "admin" {
-		// Return status 401 and unauthorized error message.
-		return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{
-			"error": true,
-			"msg":   "unauthorized, not user or admin",
-		})
+	if usernameFromJWT != adm {
+		if usernameFromJWT != user.Username && roleFromJWT != "admin" {
+			// Return status 401 and unauthorized error message.
+			return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{
+				"error": true,
+				"msg":   "unauthorized, not user or admin",
+			})
+		}
 	}
+
+	fmt.Println("value of redis", adm)
 
 	// Create database connection.
 	db, err := database.OpenDBConnection()
@@ -325,6 +359,15 @@ func Login(c *fiber.Ctx) error {
 		})
 	}
 
+	redisClient, err := caching.OpenRedisConnection()
+	if err != nil {
+		// Return status 500 and database connection error.
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"error": true,
+			"msg":   err.Error(),
+		})
+	}
+
 	userRes, err := db.Login(user)
 	if err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
@@ -339,6 +382,12 @@ func Login(c *fiber.Ctx) error {
 			"error": true,
 			"msg":   err.Error(),
 		})
+	}
+
+	if userRes.Role == "admin" {
+		if err := redisClient.Set("admin", user.Username); err != nil {
+			fmt.Printf("Error setting the admin into redis: %v", err)
+		}
 	}
 
 	// Return status 200 OK.
