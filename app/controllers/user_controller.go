@@ -17,7 +17,7 @@ import (
 // @Accept json
 // @Produce json
 // @Success 200 {array} models.UserResponse
-// @Router /v1/user [get]
+// @Router /api/v1/user [get]
 func GetUser(c *fiber.Ctx) error {
 	// Get id param
 	id := c.Params("id")
@@ -59,7 +59,7 @@ func GetUser(c *fiber.Ctx) error {
 // @Accept json
 // @Produce json
 // @Success 200 {array} models.UserResponse
-// @Router /v1/user [put]
+// @Router /api/v1/user [put]
 func UpdateUser(c *fiber.Ctx) error {
 	// Get now time.
 	now := time.Now().Unix()
@@ -153,7 +153,7 @@ func UpdateUser(c *fiber.Ctx) error {
 // @Accept json
 // @Produce json
 // @Success 200 {array} models.UserResponse
-// @Router /v1/user [delete]
+// @Router /api/v1/user [delete]
 func DeleteUser(c *fiber.Ctx) error {
 	// Get now time.
 	now := time.Now().Unix()
@@ -248,7 +248,7 @@ func DeleteUser(c *fiber.Ctx) error {
 // @Param email body string true "Email"
 // @Success 200 {object} models.UserResponse
 // @Security ApiKeyAuth
-// @Router /v1/user [post]
+// @Router /api/v1/user [post]
 func CreateUser(c *fiber.Ctx) error {
 	// Create new User struct
 	user := &models.SignUpRequest{}
@@ -291,6 +291,17 @@ func CreateUser(c *fiber.Ctx) error {
 	})
 }
 
+// @Description Login.
+// @Summary Login user.
+// @Tags Users
+// @Accept json
+// @Produce json
+// @Param username body string true "username"
+// @Param password body string true "password"
+// @Param password body string true "id"
+// @Success 200 {object} models.UserResponse
+// @Security ApiKeyAuth
+// @Router /api/v1/login [post]
 func Login(c *fiber.Ctx) error {
 	// Create new User struct
 	user := &models.LoginRequest{}
